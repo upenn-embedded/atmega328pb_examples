@@ -1,0 +1,62 @@
+{
+	// "version": "2.0.0",
+	// "tasks": [
+	// 	{
+	// 		"type": "cppbuild",
+	// 		"label": "C/C++: avr-gcc.exe build active file",
+	// 		"command": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gcc.exe",
+	// 		"args": [
+	// 			"-fdiagnostics-color=always",
+	// 			"-g",
+	// 			"${file}",
+	// 			"-o",
+	// 			"${fileDirname}\\${fileBasenameNoExtension}.exe"
+	// 		],
+	// 		"options": {
+	// 			"cwd": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin"
+	// 		},
+	// 		"problemMatcher": [
+	// 			"$gcc"
+	// 		],
+	// 		"group": "build",
+	// 		"detail": "compiler: \"C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gcc.exe\""
+	// 	}
+	// ]
+	{
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Compile AVR Project",
+				"type": "shell",
+				"command": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gcc.exe",
+				"args": [
+					"-mmcu=atmega328pb", // Specify the MCU type
+					"-DF_CPU=16000000UL", // Define the CPU clock speed for correct delay calculations
+					"-Os", // Optimize for size
+					"${file}", // The current open file
+					"-o",
+					"${fileDirname}/${fileBasenameNoExtension}.elf", // Output file
+					// Add other compiler flags and arguments as needed
+				],
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"problemMatcher": {
+					"owner": "cpp",
+					"fileLocation": [
+						"absolute"
+					],
+					"pattern": {
+						"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+						"file": 1,
+						"line": 2,
+						"column": 3,
+						"severity": 4,
+						"message": 5
+					}
+				}
+			}
+		]
+	}
+}
