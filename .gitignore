@@ -20,3 +20,5 @@
 
 #User Specific Files
 *.atsuo
+c_cpp_properties.json
+settings.json

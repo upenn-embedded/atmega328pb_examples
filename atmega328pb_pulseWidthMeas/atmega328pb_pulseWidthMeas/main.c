@@ -26,8 +26,7 @@ void Initialize() {
 
     cli();   // Disable global interrupts
 
-    // Set PB0 (ICP1 pin) to be input
-    DDRB &= ~(1 << DDB0);
+    DDRB &= ~(1 << DDB0);   // Set PB0 (ICP1 pin) to be input
 
     // Timer1 setup
     // Set Timer 1 clock to be internally divided by 8
@@ -42,11 +41,9 @@ void Initialize() {
     TCCR1B &= ~(1 << WGM12);
     TCCR1B &= ~(1 << WGM13);
 
-    // Looking for rising edge
-    TCCR1B |= (1 << ICES1);
+    TCCR1B &= ~(1 << ICES1);   // Falling edge detection
 
-    // Clear input capture flag
-    TIFR1 |= (1 << ICF1);
+    TIFR1 |= (1 << ICF1);   // Clear input capture flag
 
     sei();   // Enable global interrupts
 }
@@ -62,20 +59,20 @@ int main(void) {
     while (1) {
         // Edge 1 Capture
         while (!(TIFR1 & (1 << ICF1)))
-            ;                      // Wait for rising edge
-        edge1 = ICR1;              // Save value of this edge
-        TIFR1 |= (1 << ICF1);      // Clear input capture flag
-        TCCR1B &= ~(1 << ICES1);   // Switch to falling edge detection
-
-        // Edge 2 Capture
-        while (!(TIFR1 & (1 << ICF1)))
-            ;   // Wait for falling edge
-        edge2 = ICR1;
+            ;                     // Wait for falling edge
+        edge1 = ICR1;             // Save value of this edge
         TIFR1 |= (1 << ICF1);     // Clear input capture flag
         TCCR1B |= (1 << ICES1);   // Switch to rising edge detection
 
+        // Edge 2 Capture
+        while (!(TIFR1 & (1 << ICF1)))
+            ;   // Wait for rising edge
+        edge2 = ICR1;
+        TIFR1 |= (1 << ICF1);      // Clear input capture flag
+        TCCR1B &= ~(1 << ICES1);   // Switch to falling edge detection
+
         // Calculate pulse width
-        period = F_CPU / TIMER_PRESCALER / (edge2 - edge1);
+        period = (F_CPU / TIMER_PRESCALER) / (edge2 - edge1);
         char intStringBuffer[10];            // Buffer to hold the converted number
         itoa(period, intStringBuffer, 10);   // Convert integer to string
         UART_putstring("Pulse Width:\t");
