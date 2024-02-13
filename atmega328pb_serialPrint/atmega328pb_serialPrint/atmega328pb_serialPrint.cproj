@@ -12,9 +12,9 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>atmega328pb_interrupts</AssemblyName>
-    <Name>atmega328pb_interrupts</Name>
-    <RootNamespace>atmega328pb_interrupts</RootNamespace>
+    <AssemblyName>atmega328pb_serialPrint</AssemblyName>
+    <Name>atmega328pb_serialPrint</Name>
+    <RootNamespace>atmega328pb_serialPrint</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
@@ -135,6 +135,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="main.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="uart.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="uart.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
