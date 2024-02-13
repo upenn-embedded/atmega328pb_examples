@@ -5,6 +5,10 @@
  * Author : nmcgill
  */
 
+// #define CTC_PWM_EXAMPLE
+#define FAST_PWM_EXAMPLE
+
+#ifdef CTC_PWM_EXAMPLE
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
@@ -51,3 +55,41 @@ int main(void) {
     while (1)
         ;
 }
+#endif
+
+#ifdef FAST_PWM_EXAMPLE
+#include <avr/interrupt.h>
+#include <avr/io.h>
+
+#define F_CPU 16000000UL
+
+void Initialize() {
+
+    cli();   // Disable global interrupts
+
+    DDRD |= (1 << DDD5);   // Set PD5 as OC0B
+
+    // Timer0, prescale of 1
+    TCCR0B |= (1 << CS00);
+
+    // Timer1, Fast PWM mode
+    TCCR0A |= (1 << WGM00);
+    TCCR0A |= (1 << WGM01);
+    TCCR0B |= (1 << WGM02);
+
+    OCR0A = 39;              // Sets frequency, 400kHz
+    OCR0B = OCR0A * 3 / 4;   // Sets duty cycle, 75%
+
+    // Non-inverting mode
+    // Clear on Compare Match
+    TCCR0A |= (1 << COM0B1);
+
+    sei();   // Enable global interrupts
+}
+
+int main(void) {
+    Initialize();
+    while (1)
+        ;
+}
+#endif
