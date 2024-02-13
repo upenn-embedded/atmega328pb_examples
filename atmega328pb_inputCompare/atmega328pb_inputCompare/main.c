@@ -10,14 +10,15 @@
 #include <avr/io.h>
 #include <stdlib.h>
 
- #define POLLING_EXAMPLE
-//#define INTERRUPT_EXAMPLE
+// Choose one type of example by uncommenting
+#define POLLING_EXAMPLE
+// #define INTERRUPT_EXAMPLE
 
-#define F_CPU                16000000UL   // 16MHz clock
-#define USART_BAUD_RATE      9600
-#define USART_BAUD_PRESCALER (((F_CPU / (USART_BAUD_RATE * 16UL))) - 1)
-#define TIMER_PRESCALER      8
-#define __PRINT_NEW_LINE__   UART_putstring(terminalNewLine);
+#define F_CPU               16000000UL   // 16MHz clock
+#define UART_BAUD_RATE      9600
+#define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
+#define TIMER_PRESCALER     8
+#define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
 
 char terminalNewLine[] = "\r\n";
 
@@ -33,8 +34,7 @@ volatile int period = 0;
 volatile int print_flag = 0;
 #endif
 
-void
-Initialize() {
+void Initialize() {
 
     cli();   // Disable global interrupts
 
@@ -76,32 +76,29 @@ ISR(TIMER1_CAPT_vect) {
 }
 #endif
 
-int
-main(void) {
+int main(void) {
     Initialize();   // Set up timer 1 for input captures
 
     // Set up serial UART printing
-    UART_init(USART_BAUD_PRESCALER);
-    UART_putstring("ATmega328PB - Input Compare Example");
+    UART_init(UART_BAUD_PRESCALER);
+    UART_putstring("ATmega328PB - Input Compare Period Measurement");
     __PRINT_NEW_LINE__
 
-    // Measure period between input captures
     while (1) {
 #ifdef POLLING_EXAMPLE
+        // Rising Edge 1 Capture
         while (!(TIFR1 & (1 << ICF1)))
             ;                   // Wait until the flag is set to 1
         edge1 = ICR1;           // Save value of this edge
         TIFR1 |= (1 << ICF1);   // Clear input capture flag
-        UART_putstring("Edge 1");
-        __PRINT_NEW_LINE__
 
+        // Rising Edge 2 Capture
         while (!(TIFR1 & (1 << ICF1)))
             ;                   // Wait for change
         TIFR1 |= (1 << ICF1);   // Clear input capture flag
         edge2 = ICR1;
-        UART_putstring("Edge 2");
-        __PRINT_NEW_LINE__
 
+        // Calculate period
         period = F_CPU / TIMER_PRESCALER / (edge2 - edge1);
 #endif
 

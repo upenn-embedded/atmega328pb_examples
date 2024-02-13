@@ -4,7 +4,8 @@
 // See Section 24.6 "USART Initialization" of the ATmega328PB datasheet
 // Sets up serial UART on USART0, pins PD0 (RXD0) and PD1 (TXD0)
 
-void UART_init(int usart_baud_rate) {
+void
+UART_init(int usart_baud_rate) {
 
     // Set baud rate
     UBRR0H = (unsigned char) (usart_baud_rate >> 8);
@@ -19,7 +20,8 @@ void UART_init(int usart_baud_rate) {
     UCSR0C &= ~(1 << USBS0);                    // 1 stop bit
 }
 
-void UART_send(unsigned char data) {
+void
+UART_send(unsigned char data) {
     // Wait for empty transmit buffer
     while (!(UCSR0A & (1 << UDRE0)))
         ;
@@ -27,7 +29,8 @@ void UART_send(unsigned char data) {
     UDR0 = data;
 }
 
-void UART_putstring(char *StringPtr) {
+void
+UART_putstring(char *StringPtr) {
     while (*StringPtr != 0x00) {
         UART_send(*StringPtr);
         StringPtr++;
