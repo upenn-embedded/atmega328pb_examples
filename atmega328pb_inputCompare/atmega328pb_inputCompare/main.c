@@ -10,20 +10,33 @@
 #include <avr/io.h>
 #include <stdlib.h>
 
+ #define POLLING_EXAMPLE
+//#define INTERRUPT_EXAMPLE
+
 #define F_CPU                16000000UL   // 16MHz clock
 #define USART_BAUD_RATE      9600
 #define USART_BAUD_PRESCALER (((F_CPU / (USART_BAUD_RATE * 16UL))) - 1)
 #define TIMER_PRESCALER      8
 #define __PRINT_NEW_LINE__   UART_putstring(terminalNewLine);
 
+char terminalNewLine[] = "\r\n";
+
+#ifdef POLLING_EXAMPLE
+int period = 0;
 int edge1 = 0;
 int edge2 = 0;
-char terminalNewLine[] = "\r\n";
+#endif
+
+#ifdef INTERRUPT_EXAMPLE
+volatile int edge = 0;
+volatile int period = 0;
+volatile int print_flag = 0;
+#endif
 
 void
 Initialize() {
-    // Disable global interrupts
-    cli();
+
+    cli();   // Disable global interrupts
 
     // Set PB0 (ICP1 pin) to be input
     DDRB &= ~(1 << DDB0);
@@ -47,9 +60,21 @@ Initialize() {
     // Clear input capture flag
     TIFR1 |= (1 << ICF1);
 
-    // Enable global interrupts
-    sei();
+#ifdef INTERRUPT_EXAMPLE
+    // Enable input capture interrupt
+    TIMSK1 |= (1 << ICIE1);
+#endif
+
+    sei();   // Enable global interrupts
 }
+
+#ifdef INTERRUPT_EXAMPLE
+ISR(TIMER1_CAPT_vect) {
+    period = ICR1 - edge;
+    edge = ICR1;
+    print_flag = 1;
+}
+#endif
 
 int
 main(void) {
@@ -62,6 +87,7 @@ main(void) {
 
     // Measure period between input captures
     while (1) {
+#ifdef POLLING_EXAMPLE
         while (!(TIFR1 & (1 << ICF1)))
             ;                   // Wait until the flag is set to 1
         edge1 = ICR1;           // Save value of this edge
@@ -76,12 +102,21 @@ main(void) {
         UART_putstring("Edge 2");
         __PRINT_NEW_LINE__
 
-        int period = F_CPU / TIMER_PRESCALER / (edge2 - edge1);
-        char intStringBuffer[10];            // Buffer to hold the converted number
-        itoa(period, intStringBuffer, 10);   // Convert integer to string
-        UART_putstring("Period:\t");
-        UART_putstring(intStringBuffer);
-        __PRINT_NEW_LINE__
-        __PRINT_NEW_LINE__   // Make space between prints
+        period = F_CPU / TIMER_PRESCALER / (edge2 - edge1);
+#endif
+
+#ifdef INTERRUPT_EXAMPLE
+        if (print_flag) {
+            print_flag = 0;
+#endif
+            char intStringBuffer[10];            // Buffer to hold the converted number
+            itoa(period, intStringBuffer, 10);   // Convert integer to string
+            UART_putstring("Period:\t");
+            UART_putstring(intStringBuffer);
+            __PRINT_NEW_LINE__
+            __PRINT_NEW_LINE__   // Make space between prints
+#ifdef INTERRUPT_EXAMPLE
+        }
+#endif
     }
 }
