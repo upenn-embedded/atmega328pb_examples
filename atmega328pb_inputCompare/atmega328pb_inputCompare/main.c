@@ -81,7 +81,7 @@ int main(void) {
 
     // Set up serial UART printing
     UART_init(UART_BAUD_PRESCALER);
-    UART_putstring("ATmega328PB - Input Compare Period Measurement");
+    UART_putstring("ATmega328PB - Input Capture Period Measurement");
     __PRINT_NEW_LINE__
 
     while (1) {

@@ -5,8 +5,8 @@
  * Author : nmcgill
  */
 
-// #define CTC_PWM_EXAMPLE
-#define FAST_PWM_EXAMPLE
+ #define CTC_PWM_EXAMPLE
+//#define FAST_PWM_EXAMPLE
 
 #ifdef CTC_PWM_EXAMPLE
 #include <avr/interrupt.h>
