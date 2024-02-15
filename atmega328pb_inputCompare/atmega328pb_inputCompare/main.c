@@ -11,8 +11,8 @@
 #include <stdlib.h>
 
 // Choose one type of example by uncommenting
-#define POLLING_EXAMPLE
-// #define INTERRUPT_EXAMPLE
+// #define POLLING_EXAMPLE
+#define INTERRUPT_EXAMPLE
 
 #define F_CPU               16000000UL   // 16MHz clock
 #define UART_BAUD_RATE      9600
@@ -103,6 +103,10 @@ int main(void) {
 #endif
 
 #ifdef INTERRUPT_EXAMPLE
+
+        if (process_data) {
+            // print out stuff
+        }
         if (print_flag) {
             print_flag = 0;
 #endif

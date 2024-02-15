@@ -5,8 +5,9 @@
  * Author : nmcgill
  */
 
- #define CTC_PWM_EXAMPLE
-//#define FAST_PWM_EXAMPLE
+// #define CTC_PWM_EXAMPLE
+#define FAST_PWM_EXAMPLE
+// #define PHASE_CORRECT_VS_FAST_EXAMPLE
 
 #ifdef CTC_PWM_EXAMPLE
 #include <avr/interrupt.h>
@@ -83,6 +84,48 @@ void Initialize() {
     // Non-inverting mode
     // Clear on Compare Match
     TCCR0A |= (1 << COM0B1);
+
+    sei();   // Enable global interrupts
+}
+
+int main(void) {
+    Initialize();
+    while (1)
+        ;
+}
+#endif
+
+#ifdef PHASE_CORRECT_VS_FAST_EXAMPLE
+#include <avr/interrupt.h>
+#include <avr/io.h>
+
+#define F_CPU 16000000UL
+
+void Initialize() {
+
+    cli();   // Disable global interrupts
+
+    // Set PD5 (OC0B) and PD6 (OC0A) as outputs
+    DDRD |= (1 << DDD5) | (1 << DDD6);
+
+    // Timer0, prescale of 1
+    TCCR0B |= (1 << CS01) | (1 << CS00);
+
+    // Timer0, Fast PWM mode (Mode 3)
+    TCCR0A |= (1 << WGM00) | (1 << WGM01);
+    TCCR0B |= (0 << WGM02);
+
+    // // Timer0, Phase Correct PWM mode (Mode 1)
+    // TCCR0A |= (1 << WGM00) | (0 << WGM01);
+    // TCCR0B |= (0 << WGM02);
+
+    // Non-inverting mode
+    // Clear on Compare Match
+    TCCR0A |= (1 << COM0A1) | (1 << COM0B1);
+    TCCR0A &= ~((1 << COM0A0) | (1 << COM0B0));
+
+    OCR0A = 200;             // Sets frequency, 400kHz
+    OCR0B = OCR0A * 3 / 4;   // Sets duty cycle, 75%
 
     sei();   // Enable global interrupts
 }
