@@ -6,8 +6,8 @@
  */
 
 // #define CTC_PWM_EXAMPLE
-#define FAST_PWM_EXAMPLE
-// #define PHASE_CORRECT_VS_FAST_EXAMPLE
+// #define FAST_PWM_EXAMPLE
+#define PHASE_CORRECT_VS_FAST_EXAMPLE
 
 #ifdef CTC_PWM_EXAMPLE
 #include <avr/interrupt.h>
@@ -79,7 +79,7 @@ void Initialize() {
     TCCR0B |= (1 << WGM02);
 
     OCR0A = 39;              // Sets frequency, 400kHz
-    OCR0B = OCR0A * 3 / 4;   // Sets duty cycle, 75%
+    OCR0B = OCR0A * 1 / 4;   // Sets duty cycle, 75%
 
     // Non-inverting mode
     // Clear on Compare Match
@@ -124,8 +124,8 @@ void Initialize() {
     TCCR0A |= (1 << COM0A1) | (1 << COM0B1);
     TCCR0A &= ~((1 << COM0A0) | (1 << COM0B0));
 
-    OCR0A = 200;             // Sets frequency, 400kHz
-    OCR0B = OCR0A * 3 / 4;   // Sets duty cycle, 75%
+    OCR0A = 200;             // Sets frequency
+    OCR0B = OCR0A * 1 / 4;   // Sets duty cycle, 75%
 
     sei();   // Enable global interrupts
 }

@@ -5,9 +5,9 @@
  * Author : nmcgill
  */
 
-//#define LED_TOGGLE_EXAMPLE
-#define PULSE_GENERATION_EXAMPLE
-//#define FREQUENCY_MEASURE_EXAMPLE
+#define LED_TOGGLE_EXAMPLE
+// #define PULSE_GENERATION_EXAMPLE
+// #define FREQUENCY_MEASURE_EXAMPLE
 
 #ifdef LED_TOGGLE_EXAMPLE
 #include <avr/interrupt.h>
