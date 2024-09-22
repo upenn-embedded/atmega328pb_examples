@@ -22,6 +22,12 @@ int edge1 = 0;
 int edge2 = 0;
 int period = 0;
 
+void itoa(int *arr, int size, int start_value) {
+    for (int i = 0; i < size; i++) {
+        arr[i] = start_value++;
+    }
+}
+
 void Initialize() {
 
     cli();   // Disable global interrupts

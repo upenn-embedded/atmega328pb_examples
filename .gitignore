@@ -1,3 +1,6 @@
+#Mac temporary files
+.DS_Store
+
 ## Ignore Atmel Studio temporary files and build results
 # https://www.microchip.com/mplab/avr-support/atmel-studio-7
 
@@ -22,3 +25,11 @@
 *.atsuo
 c_cpp_properties.json
 settings.json
+/atmega328pb_timers/atmega328pb_timers/atmega328pb_timers.X/build/
+/atmega328pb_timers/atmega328pb_timers/atmega328pb_timers.X/dist/
+/atmega328pb_pwm/atmega328pb_pwm/atmega328pb_pwm.X/dist/
+/atmega328pb_pwm/atmega328pb_pwm/atmega328pb_pwm.X/build/
+/atmega328pb_pulseWidthMeas/atmega328pb_pulseWidthMeas/atmega328pb_pulseWidthMeas.X/dist/
+/atmega328pb_pulseWidthMeas/atmega328pb_pulseWidthMeas/atmega328pb_pulseWidthMeas.X/build/
+/atmega328pb_interrupts/atmega328pb_interrupts/atmega328pb_interrupts.X/dist/
+/atmega328pb_interrupts/atmega328pb_interrupts/atmega328pb_interrupts.X/build/
