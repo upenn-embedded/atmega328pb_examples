@@ -33,3 +33,5 @@ settings.json
 /atmega328pb_pulseWidthMeas/atmega328pb_pulseWidthMeas/atmega328pb_pulseWidthMeas.X/build/
 /atmega328pb_interrupts/atmega328pb_interrupts/atmega328pb_interrupts.X/dist/
 /atmega328pb_interrupts/atmega328pb_interrupts/atmega328pb_interrupts.X/build/
+/atmega328pb_inputCompare/atmega328pb_inputCompare/atmega328pb_inputCapture.X/build/
+/atmega328pb_inputCompare/atmega328pb_inputCompare/atmega328pb_inputCapture.X/dist/

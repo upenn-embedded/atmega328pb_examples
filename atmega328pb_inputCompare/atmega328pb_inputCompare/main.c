@@ -104,14 +104,11 @@ int main(void) {
 
 #ifdef INTERRUPT_EXAMPLE
 
-        if (process_data) {
-            // print out stuff
-        }
         if (print_flag) {
             print_flag = 0;
 #endif
             char intStringBuffer[10];            // Buffer to hold the converted number
-            itoa(period, intStringBuffer, 10);   // Convert integer to string
+//            itoa(period, intStringBuffer, 10);   // Convert integer to string
             UART_putstring("Period:\t");
             UART_putstring(intStringBuffer);
             __PRINT_NEW_LINE__
