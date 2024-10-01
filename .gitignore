@@ -35,3 +35,5 @@ settings.json
 /atmega328pb_interrupts/atmega328pb_interrupts/atmega328pb_interrupts.X/build/
 /atmega328pb_inputCompare/atmega328pb_inputCompare/atmega328pb_inputCapture.X/build/
 /atmega328pb_inputCompare/atmega328pb_inputCompare/atmega328pb_inputCapture.X/dist/
+/atmega328pb_serialPrint/atmega328pb_serialPrint/atmega328pb_serialPrint.X/build/
+/atmega328pb_serialPrint/atmega328pb_serialPrint/atmega328pb_serialPrint.X/dist/
