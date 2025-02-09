@@ -1,8 +1,8 @@
 // -------------------------------------
 // Uncomment only example at a time!
-#define CTC_PWM_EXAMPLE
+//#define CTC_PWM_EXAMPLE
 // #define FAST_PWM_EXAMPLE
-//#define PHASE_CORRECT_VS_FAST_EXAMPLE
+#define PHASE_CORRECT_VS_FAST_EXAMPLE
 // -------------------------------------
 
 #ifdef CTC_PWM_EXAMPLE
@@ -71,7 +71,7 @@ void Initialize() {
     TCCR0B |= (1 << WGM02);
 
     OCR0A = 39; // Sets frequency, 400kHz
-    OCR0B = OCR0A * 1 / 4; // Sets duty cycle, 75%
+    OCR0B = OCR0A * 1 / 4; // Sets duty cycle
 
     // Non-inverting mode
     // Clear on Compare Match
@@ -101,13 +101,13 @@ void Initialize() {
     // Timer0, prescale of 1
     TCCR0B |= (1 << CS01) | (1 << CS00);
 
-    // Timer0, Fast PWM mode (Mode 3)
-    TCCR0A |= (1 << WGM00) | (1 << WGM01);
-    TCCR0B |= (0 << WGM02);
+    //    // Timer0, Fast PWM mode (Mode 3)
+    //    TCCR0A |= (1 << WGM00) | (1 << WGM01);
+    //    TCCR0B |= (0 << WGM02);
 
-    // // Timer0, Phase Correct PWM mode (Mode 1)
-    // TCCR0A |= (1 << WGM00) | (0 << WGM01);
-    // TCCR0B |= (0 << WGM02);
+    // Timer0, Phase Correct PWM mode (Mode 1)
+    TCCR0A |= (1 << WGM00) | (0 << WGM01);
+    TCCR0B |= (0 << WGM02);
 
     // Non-inverting mode
     // Clear on Compare Match
