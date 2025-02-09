@@ -1,7 +1,9 @@
+// -------------------------------------
+// Uncomment only example at a time!
 #define CTC_PWM_EXAMPLE
 // #define FAST_PWM_EXAMPLE
 //#define PHASE_CORRECT_VS_FAST_EXAMPLE
-
+// -------------------------------------
 
 #ifdef CTC_PWM_EXAMPLE
 #include <xc.h>

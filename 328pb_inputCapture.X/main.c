@@ -1,13 +1,14 @@
-// Uncomment only one of these at a time!
-//#define INTERRUPT_EXAMPLE
-#define POLLING_EXAMPLE
+// -------------------------------------
+// Uncomment only example at a time!
+#define INTERRUPT_EXAMPLE
+//#define POLLING_EXAMPLE
+// -------------------------------------
 
-// Polling Example
+
 #ifdef POLLING_EXAMPLE
 #include <xc.h>
 #include "../common_libraries/uart.h"
 #include <stdio.h>
-
 
 #define F_CPU               16000000UL   // 16MHz clock
 #define UART_BAUD_RATE      9600
@@ -48,7 +49,7 @@ void Initialize() {
     // Input wave setup
     DDRD |= (1 << DDD5); // Set PD5 as OC0B
 
-    // Timer0, prescale of 1
+    // Timer0, prescale
     //    TCCR0B |= (1 << CS00);
     TCCR0B |= (1 << CS02);
 
@@ -107,6 +108,7 @@ int main(void) {
 #include <stdio.h>
 
 #define F_CPU               16000000UL   // 16MHz clock
+#define TIMER_PRESCALER     8
 #define UART_BAUD_RATE      9600
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
 #define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
@@ -117,13 +119,14 @@ char terminalNewLine[] = "\r\n";
 volatile int edge = 0;
 volatile int period = 0;
 volatile int print_flag = 0;
+int signal_frequency = 0;
 
 void Initialize() {
 
     cli(); // Disable global interrupts
 
+    // Input Capture Setup
     DDRB &= ~(1 << DDB0); // Set PB0 (ICP1 pin) to be input
-    DDRD |= (1 << DDD4); // Set PD4 to be an output
 
     // Timer1 setup
     // Set Timer 1 clock to be internally divided by 8
@@ -147,7 +150,33 @@ void Initialize() {
     // Enable input capture interrupt
     TIMSK1 |= (1 << ICIE1);
 
+
+    // Input wave setup
+    DDRD |= (1 << DDD5); // Set PD5 as OC0B
+
+    // Timer0, prescale
+    //    TCCR0B |= (1 << CS00);
+    TCCR0B |= (1 << CS02);
+
+    // Timer0, Fast PWM mode
+    TCCR0A |= (1 << WGM00);
+    TCCR0A |= (1 << WGM01);
+    TCCR0B |= (1 << WGM02);
+
+    OCR0A = 39; // Sets frequency, 400kHz
+    OCR0B = OCR0A * 1 / 4; // Sets duty cycle, 75%
+
+    // Non-inverting mode
+    // Clear on Compare Match
+    TCCR0A |= (1 << COM0B1);
+
     sei(); // Enable global interrupts
+}
+
+ISR(TIMER1_CAPT_vect) {
+    period = ICR1 - edge;
+    edge = ICR1;
+    print_flag = 1;
 }
 
 int main(void) {
@@ -159,13 +188,14 @@ int main(void) {
     __PRINT_NEW_LINE__
 
     while (1) {
-
-        PORTD ^= (1 << PORTD4); // Toggle pin
-
         if (print_flag) {
             print_flag = 0;
+
+            // Calculate signal frequency
+            signal_frequency = F_CPU / TIMER_PRESCALER / period;
+
             char intStringBuffer[20]; // Buffer to hold the converted number
-            sprintf(intStringBuffer, "Period:\t %d", period); // Convert integer to string
+            sprintf(intStringBuffer, "Signal Frequency:\t %d Hz", signal_frequency); // Convert integer to string
             UART_putstring(intStringBuffer);
             __PRINT_NEW_LINE__
             __PRINT_NEW_LINE__ // Make space between prints
@@ -173,6 +203,3 @@ int main(void) {
     }
 }
 #endif
-
-
-
