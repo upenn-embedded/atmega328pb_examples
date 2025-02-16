@@ -1,12 +1,14 @@
 // -------------------------------------
 // Uncomment only example at a time!
-// #define PERIOD_MEASUREMENT_INTERRUPT_EXAMPLE
 //#define PERIOD_MEASUREMENT_POLLING_EXAMPLE
+//#define PERIOD_MEASUREMENT_INTERRUPT_EXAMPLE
 #define PULSE_WIDTH_MEASUREMENT_POLLING_EXAMPLE
 // -------------------------------------
 
 
 #ifdef PERIOD_MEASUREMENT_POLLING_EXAMPLE
+// Description: Measure the period of a signal using polling
+// Note: This example is simple and doesn't handle timer overflow edge cases.
 #include <xc.h>
 #include "../common_libraries/uart.h"
 #include <stdio.h> // For sprintf
@@ -50,7 +52,7 @@ void Initialize() {
     DDRD |= (1 << DDD5); // Set PD5 as OC0B
 
     // Timer0, prescale
-    //    TCCR0B |= (1 << CS00);
+    TCCR0B |= (1 << CS00);
     TCCR0B |= (1 << CS02);
 
     // Timer0, Fast PWM mode
@@ -58,7 +60,7 @@ void Initialize() {
     TCCR0A |= (1 << WGM01);
     TCCR0B |= (1 << WGM02);
 
-    OCR0A = 39; // Sets frequency, 400kHz
+    OCR0A = 39; // Sets frequency (390Hz))
     OCR0B = OCR0A * 1 / 4; // Sets duty cycle, 75%
 
     // Non-inverting mode
@@ -77,14 +79,12 @@ int main(void) {
     while (1) {
 
         // Rising Edge 1 Capture
-        while (!(TIFR1 & (1 << ICF1)))
-            ; // Wait until the flag is set to 1
+        while (!(TIFR1 & (1 << ICF1))); // Wait until the flag is set to 1
         edge1 = ICR1; // Save value of this edge
         TIFR1 |= (1 << ICF1); // Clear input capture flag
 
         // Rising Edge 2 Capture
-        while (!(TIFR1 & (1 << ICF1)))
-            ; // Wait for change
+        while (!(TIFR1 & (1 << ICF1))); // Wait for change
         TIFR1 |= (1 << ICF1); // Clear input capture flag
         edge2 = ICR1;
 
@@ -102,6 +102,9 @@ int main(void) {
 
 
 #ifdef PERIOD_MEASUREMENT_INTERRUPT_EXAMPLE
+// Description: Measure the period of a signal using interrupts
+// Note: This example is simple and doesn't handle timer overflow edge cases.
+
 #include <xc.h>
 #include "../common_libraries/uart.h"
 #include <avr/interrupt.h>
@@ -155,7 +158,7 @@ void Initialize() {
     DDRD |= (1 << DDD5); // Set PD5 as OC0B
 
     // Timer0, prescale
-    //    TCCR0B |= (1 << CS00);
+    TCCR0B |= (1 << CS00);
     TCCR0B |= (1 << CS02);
 
     // Timer0, Fast PWM mode
@@ -163,7 +166,7 @@ void Initialize() {
     TCCR0A |= (1 << WGM01);
     TCCR0B |= (1 << WGM02);
 
-    OCR0A = 39; // Sets frequency, 400kHz
+    OCR0A = 39; // Sets frequency, ~390Hz
     OCR0B = OCR0A * 1 / 4; // Sets duty cycle, 75%
 
     // Non-inverting mode
@@ -206,6 +209,9 @@ int main(void) {
 
 
 #ifdef PULSE_WIDTH_MEASUREMENT_POLLING_EXAMPLE
+// Description: Measure the pulse width of a signal, logic high pulse
+// Note: This example is simple and doesn't handle timer overflow edge cases.
+
 #include <xc.h>
 #include "../common_libraries/uart.h"
 #include <stdio.h> // For sprintf
@@ -213,30 +219,22 @@ int main(void) {
 #define F_CPU               16000000UL   // 16MHz clock
 #define UART_BAUD_RATE      9600
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
-#define TIMER_PRESCALER     8
+#define TIMER_PRESCALER     64
 #define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
 
 char terminalNewLine[] = "\r\n";
-
-int edge1 = 0;
-int edge2 = 0;
-int period = 0;
-
-void itoa(int *arr, int size, int start_value) {
-    for (int i = 0; i < size; i++) {
-        arr[i] = start_value++;
-    }
-}
+int risingEdge_counts = 0;
+int fallingEdge_counts = 0;
+int pulseWidth_us = 0;
 
 void Initialize() {
 
-
-    DDRB &= ~(1 << DDB0);   // Set PB0 (ICP1 pin) to be input
+    DDRB &= ~(1 << DDB0); // Set PB0 (ICP1 pin) to be input
 
     // Timer1 setup
-    // Set Timer 1 clock to be internally divided by 8
-    // 2MHz timer clock, 1 tick = (1/2M) second
-    TCCR1B &= ~(1 << CS10);
+    // Set Timer 1 clock to be internally divided by 64
+    // 250kHz timer clock, 1 tick = (1/250k) second = 4us/tick
+    TCCR1B |= (1 << CS10);
     TCCR1B |= (1 << CS11);
     TCCR1B &= ~(1 << CS12);
 
@@ -246,42 +244,55 @@ void Initialize() {
     TCCR1B &= ~(1 << WGM12);
     TCCR1B &= ~(1 << WGM13);
 
-    TCCR1B &= ~(1 << ICES1);   // Falling edge detection
+    TCCR1B |= (1 << ICES1); // Rising edge detection
+    TIFR1 |= (1 << ICF1); // Clear input capture flag
 
-    TIFR1 |= (1 << ICF1);   // Clear input capture flag
+
+    // ==== Sample waveform setup
+    DDRD |= (1 << DDD5); // Set PD5 as OC0B
+
+    // Timer0, prescale (/1024)
+    TCCR0B |= (1 << CS00);
+    TCCR0B |= (1 << CS02);
+
+    // Timer0, Fast PWM mode
+    TCCR0A |= (1 << WGM00);
+    TCCR0A |= (1 << WGM01);
+    TCCR0B |= (1 << WGM02);
+
+    OCR0A = 39; // Sets frequency, ~390Hz
+    OCR0B = OCR0A * 1 / 4; // Sets duty cycle, 75%
+    TCCR0A |= (1 << COM0B1); // Non-inverting mode, Clear on Compare Match
 }
 
 int main(void) {
-    Initialize();   // Set up timer 1 for input capture
+    Initialize();
 
-    // Set up serial UART printing
-    UART_init(UART_BAUD_PRESCALER);
-    UART_putstring("ATmega328PB - Input Capture Pulse Width Measurement");
+    UART_init(UART_BAUD_PRESCALER); // Set up serial UART printing
     __PRINT_NEW_LINE__
+    UART_putstring("ATmega328PB - Input Capture Pulse Width Measurement");
 
     while (1) {
         // Edge 1 Capture
-        while (!(TIFR1 & (1 << ICF1)))
-            ;                     // Wait for falling edge
-        edge1 = ICR1;             // Save value of this edge
-        TIFR1 |= (1 << ICF1);     // Clear input capture flag
-        TCCR1B |= (1 << ICES1);   // Switch to rising edge detection
+        while (!(TIFR1 & (1 << ICF1))); // Wait for rising edge
+        risingEdge_counts = ICR1; // Save value of this edge
+        TIFR1 |= (1 << ICF1); // Clear input capture flag
+        TCCR1B &= ~(1 << ICES1); // Switch to falling edge detection
 
         // Edge 2 Capture
-        while (!(TIFR1 & (1 << ICF1)))
-            ;   // Wait for rising edge
-        edge2 = ICR1;
-        TIFR1 |= (1 << ICF1);      // Clear input capture flag
-        TCCR1B &= ~(1 << ICES1);   // Switch to falling edge detection
+        while (!(TIFR1 & (1 << ICF1))); // Wait for falling edge
+        fallingEdge_counts = ICR1;
+        TIFR1 |= (1 << ICF1); // Clear input capture flag
+        TCCR1B |= (1 << ICES1); // Switch to rising edge detection
 
         // Calculate pulse width
-        period = (F_CPU / TIMER_PRESCALER) / (edge2 - edge1);
+        // 16MHz / 64 = 250kHz, 1 tick = 4us
+        pulseWidth_us = 4 * (fallingEdge_counts - risingEdge_counts);
 
         char intStringBuffer[20]; // Buffer to hold the converted number
-        sprintf(intStringBuffer, "Pulse Width:\t %d", period); // Convert integer to string
-        UART_putstring(intStringBuffer);
         __PRINT_NEW_LINE__
-        __PRINT_NEW_LINE__ // Make space between prints
+        sprintf(intStringBuffer, "Pulse Width (us):\t %d", pulseWidth_us); // Convert integer to string
+        UART_putstring(intStringBuffer);
     }
 }
 #endif
