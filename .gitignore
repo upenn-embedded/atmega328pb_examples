@@ -43,8 +43,8 @@ dist/
 build/
 
 # Ignore MPLAB X generated Makefiles
-nbproject/Makefile-*
-nbproject/private/
+**/nbproject/Makefile-*
+**/nbproject/private/
 
 # Ignore backup and temporary files
 *.log
