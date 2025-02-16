@@ -9,7 +9,7 @@
 #ifdef PERIOD_MEASUREMENT_POLLING_EXAMPLE
 #include <xc.h>
 #include "../common_libraries/uart.h"
-#include <stdio.h>
+#include <stdio.h> // For sprintf
 
 #define F_CPU               16000000UL   // 16MHz clock
 #define UART_BAUD_RATE      9600
@@ -24,7 +24,7 @@ int edge1 = 0;
 int edge2 = 0;
 
 void Initialize() {
-    // Input Capture Setup
+    // ===== Input Capture Setup
     DDRB &= ~(1 << DDB0); // Set PB0 (ICP1 pin) to be input
 
     // Timer1 setup
@@ -46,8 +46,7 @@ void Initialize() {
     // Clear input capture flag
     TIFR1 |= (1 << ICF1);
 
-
-    // Input wave setup
+    // ===== Input wave setup
     DDRD |= (1 << DDD5); // Set PD5 as OC0B
 
     // Timer0, prescale
@@ -106,7 +105,7 @@ int main(void) {
 #include <xc.h>
 #include "../common_libraries/uart.h"
 #include <avr/interrupt.h>
-#include <stdio.h>
+#include <stdio.h> // For sprintf
 
 #define F_CPU               16000000UL   // 16MHz clock
 #define TIMER_PRESCALER     8
@@ -152,7 +151,7 @@ void Initialize() {
     TIMSK1 |= (1 << ICIE1);
 
 
-    // Input wave setup
+    // Sample waveform setup
     DDRD |= (1 << DDD5); // Set PD5 as OC0B
 
     // Timer0, prescale
@@ -209,7 +208,7 @@ int main(void) {
 #ifdef PULSE_WIDTH_MEASUREMENT_POLLING_EXAMPLE
 #include <xc.h>
 #include "../common_libraries/uart.h"
-#include <stdio.h>
+#include <stdio.h> // For sprintf
 
 #define F_CPU               16000000UL   // 16MHz clock
 #define UART_BAUD_RATE      9600
