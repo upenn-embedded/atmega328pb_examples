@@ -65,3 +65,10 @@ build/
 
 # Ignore generated files
 .generated_files/
+
+# Ignore debug trace
+**/defmplabxtrace.log
+**/defmplabxtrace.log.inx
+
+# ignore autosave file
+**/mcc-manifest-autosave.yml
