@@ -1,8 +1,9 @@
-#define LED_TOGGLE_EXAMPLE
-// #define PULSE_GENERATION_EXAMPLE
+//#define LED_TOGGLE_EXAMPLE
+#define PULSE_GENERATION_EXAMPLE
 // #define FREQUENCY_MEASURE_EXAMPLE
 
 #ifdef LED_TOGGLE_EXAMPLE
+// Description: Use Output Compare match to generate a 1Hz square wave with 50% duty cycle
 #include <xc.h>
 #include "../common_libraries/uart.h"
 
@@ -30,12 +31,13 @@ void Initialize() {
 
 int main(void) {
     Initialize();
-    while (1)
-        ;
+    while (1);
 }
 #endif
 
 #ifdef PULSE_GENERATION_EXAMPLE
+// Description: Use Output Compare to generate a pulse, high for 0.5ms and low for 2ms
+
 #include <xc.h>
 #include "../common_libraries/uart.h"
 #include <avr/interrupt.h>
@@ -44,7 +46,9 @@ int main(void) {
 
 int high_time = 999; // 0.5ms * (16MHz/8) - 1 = 999 ticks
 int low_time = 3999; // 2ms * (16MHz/8) - 1 = 3999 ticks
-volatile int high_or_low = 1; // high=1, low=0
+#define LOGIC_HIGH 1
+#define LOGIC_LOW 0
+volatile int nextSignalLevel; // high=1, low=0
 
 void Initialize() {
 
@@ -65,26 +69,31 @@ void Initialize() {
 
     // Toggle OC1B on compare match
     TCCR1A |= (1 << COM1B0);
-    OCR1B = 100; // PB2 will be quickly pulled high
-    TIFR1 |= (1 << OCF1B); // Clear interrupt flag
+
+    // Set initial compare match to kick things off
+    // Starting with low signal
+    OCR1B = low_time;
+    nextSignalLevel = LOGIC_HIGH;
+
+    // Clear interrupt flag
+    TIFR1 |= (1 << OCF1B);
 
     sei(); // Enable global interrupts
 }
 
 ISR(TIMER1_COMPB_vect) {
-    if (high_or_low) {
+    if (nextSignalLevel == LOGIC_HIGH) {
         OCR1B += high_time;
-        high_or_low = 0;
+        nextSignalLevel = LOGIC_LOW;
     } else {
         OCR1B += low_time;
-        high_or_low = 1;
+        nextSignalLevel = LOGIC_HIGH;
     }
 }
 
 int main(void) {
     Initialize();
-    while (1)
-        ;
+    while (1);
 }
 #endif
 
