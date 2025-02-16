@@ -62,3 +62,6 @@ nbproject/private/
 *.d
 *.lst
 *.s
+
+# Ignore generated files
+.generated_files/
