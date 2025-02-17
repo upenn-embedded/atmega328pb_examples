@@ -1,7 +1,7 @@
 // Choose ONE example to run (and comment out all others)
-//#define ADC_READ_EXAMPLE
-// #define TEMPERATURE_READ_EXAMPLE //Still needs a little work!
-#define SIGNAL_FREQ_MEASURE_EXAMPLE
+#define ADC_READ_EXAMPLE
+//#define TEMPERATURE_READ_EXAMPLE //Still needs a little work!
+//#define SIGNAL_FREQ_MEASURE_EXAMPLE
 
 #ifdef ADC_READ_EXAMPLE
 // Description:

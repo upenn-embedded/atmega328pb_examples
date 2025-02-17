@@ -1,6 +1,6 @@
-#define LED_TOGGLE_EXAMPLE
+//#define LED_TOGGLE_EXAMPLE
 //#define PULSE_GENERATION_EXAMPLE
-//#define FREQUENCY_MEASURE_EXAMPLE
+#define FREQUENCY_MEASURE_EXAMPLE
 
 #ifdef LED_TOGGLE_EXAMPLE
 // Description: Use Output Compare match to generate a 1Hz square wave with 50% duty cycle
@@ -103,9 +103,7 @@ int main(void) {
 #define F_CPU               16000000UL
 #define UART_BAUD_RATE      9600
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
-#define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
 
-char terminalNewLine[] = "\r\n";
 volatile int print_flag = 0;
 volatile int rising_edge_count = 0;
 volatile int signal_frequency = 0;

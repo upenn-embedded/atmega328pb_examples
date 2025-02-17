@@ -17,9 +17,6 @@
 #define UART_BAUD_RATE      9600
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
 #define TIMER_PRESCALER     8
-#define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
-
-char terminalNewLine[] = "\r\n";
 
 int signal_frequency = 0;
 int edge1 = 0;
@@ -114,9 +111,6 @@ int main(void) {
 #define TIMER_PRESCALER     8
 #define UART_BAUD_RATE      9600
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
-#define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
-
-char terminalNewLine[] = "\r\n";
 
 // Input capture variables
 volatile int edge = 0;
@@ -220,9 +214,7 @@ int main(void) {
 #define UART_BAUD_RATE      9600
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
 #define TIMER_PRESCALER     64
-#define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
 
-char terminalNewLine[] = "\r\n";
 int risingEdge_counts = 0;
 int fallingEdge_counts = 0;
 int pulseWidth_us = 0;
