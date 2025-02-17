@@ -1,17 +1,31 @@
 // -------------------------------------
 // Uncomment only example at a time!
-//#define CTC_PWM_EXAMPLE
+#define CTC_PWM_EXAMPLE
 // #define FAST_PWM_EXAMPLE
-#define PHASE_CORRECT_VS_FAST_EXAMPLE
+//#define PHASE_CORRECT_VS_FAST_EXAMPLE
 // -------------------------------------
 
 #ifdef CTC_PWM_EXAMPLE
+//Description: Generate a 400Hz PWM signal with a 30% duty cycle
+// using CTC mode with interrupts
+
 #include <xc.h>
 #include <avr/interrupt.h>
 
+// Calculation: 440Hz @ 30% duty cycle
+// Period = 1/440Hz = ~2ms
+// High time = 30% * 2ms = 0.6ms
+// Low time = 70% * 2ms = 1.4ms
+// For 440Hz 50% duty cycle: Count = (16MHz/(2*1*440Hz))-1 = 18180
+// Total count in period = 2*18180 = 36360
+// Adjusting for 30% duty cycle: (36360 * 0.3)-1 = 10907
+// Adjusting for 70% duty cycle: (36360 * 0.7)-1 = 25451
+// Subtracting 1 because the count starts at 0
 int high_time = 10907;
 int low_time = 25451;
-volatile int high_low = 1; // start high
+#define LOGIC_HIGH 1
+#define LOGIC_LOW 0
+volatile int nextSignalLevel; // high=1, low=0
 
 void Initialize() {
 
@@ -26,33 +40,33 @@ void Initialize() {
     // Timer1, CTC mode
     TCCR1B |= (1 << WGM12);
 
-    // Toggle on compare match
-    TCCR1A |= (1 << COM1A0);
-    OCR1A = 20;
+    
+    TCCR1A |= (1 << COM1A0); // Toggle on compare match
+    OCR1A = low_time;
+    nextSignalLevel = LOGIC_LOW; // Starting with low signal
 
     TIMSK1 |= (1 << OCIE1A); // Enable Interrupt
-
     TIFR1 |= (1 << OCF1A); // Clear interrupt flag
 
     sei(); // Enable global interrupts
 }
 
 ISR(TIMER1_COMPA_vect) {
-    if (high_low) {
+    if (nextSignalLevel == LOGIC_HIGH) {
         OCR1A = low_time;
-        high_low = 0;
+        nextSignalLevel = LOGIC_LOW;
     } else {
         OCR1A = high_time;
-        high_low = 1;
+        nextSignalLevel = LOGIC_HIGH;
     }
 }
 
 int main(void) {
     Initialize();
-    while (1)
-        ;
+    while (1);
 }
 #endif
+
 
 #ifdef FAST_PWM_EXAMPLE
 #include <xc.h>

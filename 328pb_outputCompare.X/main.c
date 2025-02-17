@@ -67,19 +67,11 @@ void Initialize() {
 
     // Leave Timer 1 in default, Normal mode
 
-    // Enable Output Compare B interrupt
-    TIMSK1 |= (1 << OCIE1B);
-
-    // Toggle OC1B on compare match
-    TCCR1A |= (1 << COM1B0);
-
-    // Set initial compare match to kick things off
-    // Starting with low signal
-    OCR1B = low_time;
-    nextSignalLevel = LOGIC_HIGH;
-
-    // Clear interrupt flag
-    TIFR1 |= (1 << OCF1B);
+    TIMSK1 |= (1 << OCIE1B); // Enable Output Compare B interrupt
+    TCCR1A |= (1 << COM1B0); // Toggle OC1B on compare match
+    OCR1B = low_time; // Set initial compare match to kick things off
+    nextSignalLevel = LOGIC_HIGH; // Starting with low signal
+    TIFR1 |= (1 << OCF1B); // Clear interrupt flag
 
     sei(); // Enable global interrupts
 }
