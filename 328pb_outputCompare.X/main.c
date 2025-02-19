@@ -1,9 +1,10 @@
-//#define LED_TOGGLE_EXAMPLE
-//#define PULSE_GENERATION_EXAMPLE
-#define FREQUENCY_MEASURE_EXAMPLE
+// #define LED_TOGGLE_EXAMPLE
+#define PULSE_GENERATION_EXAMPLE
+// #define FREQUENCY_MEASURE_EXAMPLE
 
 #ifdef LED_TOGGLE_EXAMPLE
 // Description: Use Output Compare match to generate a 1Hz square wave with 50% duty cycle
+#define F_CPU 16000000UL
 #include <xc.h>
 #include "../common_libraries/uart.h"
 
@@ -40,15 +41,12 @@ int main(void) {
 #ifdef PULSE_GENERATION_EXAMPLE
 // Description: Use Output Compare to generate a pulse, high for 0.5ms and low for 2ms
 
+#define F_CPU 16000000UL
 #include <xc.h>
-#include "../common_libraries/uart.h"
-#include <stdio.h> // For sprintf
 #include <avr/interrupt.h>
 
-#define F_CPU 16000000UL
-
-int high_time = 999; // 0.5ms * (16MHz/8) - 1 = 999 ticks
-int low_time = 3999; // 2ms * (16MHz/8) - 1 = 3999 ticks
+int high_time_ticks = 1000; // 0.5ms * (16MHz/8) = 1000 ticks
+int low_time_ticks = 4000; // 2ms * (16MHz/8) = 4000 ticks
 #define LOGIC_HIGH 1
 #define LOGIC_LOW 0
 volatile int nextSignalLevel; // high=1, low=0
@@ -65,23 +63,46 @@ void Initialize() {
     // System clock is 16MHz, Timer1 clock is 16M/8 = 2MHz
     TCCR1B |= (1 << CS11);
 
-    // Leave Timer 1 in default, Normal mode
+    // Leave Timer 1 in its default, Normal mode (Mode 0)
+    // The Waveform Generation Mode bits are all zero by default
+    // The timer will count up to 0xFFFF and then overflow back to 0x0000
 
-    TIMSK1 |= (1 << OCIE1B); // Enable Output Compare B interrupt
-    TCCR1A |= (1 << COM1B0); // Toggle OC1B on compare match
-    OCR1B = low_time; // Set initial compare match to kick things off
-    nextSignalLevel = LOGIC_HIGH; // Starting with low signal
-    TIFR1 |= (1 << OCF1B); // Clear interrupt flag
+    // Enable Output Compare B Match Interrupt
+    TIMSK1 |= (1 << OCIE1B);
+
+    // Toggle OC1B (pin PB2) on compare match
+    TCCR1A |= (1 << COM1B0);
+
+    // Set initial compare match to kick things off
+    // Subtract one to account for starting at 0
+    // Starting with low signal
+    OCR1B = low_time_ticks-1;
+    nextSignalLevel = LOGIC_HIGH;
+
+    // Clear interrupt flag
+    TIFR1 |= (1 << OCF1B);
 
     sei(); // Enable global interrupts
 }
 
 ISR(TIMER1_COMPB_vect) {
+    // This ISR triggers every time the OCR1B value matches the Counter (TCNT1)
+    // TCNT1 counts from 0 to 0xFFFF, then overflows back to 0x0000.
+    // TCNT1 does NOT reset to 0 on compare match! It keeps counting.
+    // We need to adjust the OCR1B value at every compare match to set the correct pulse width.
+    
+    // What happens on overflow? It works! We just need the low and high pulse times to be correct.
+    // Example: When TCNT = OCR1B = 65000, the signal toggles to LOW. What should we set OCR1B to?
+    // Add the LOW time (4000 ticks) to the existing OCR1B value to set the next transition time.
+    // OCR1B = 65000 + 4000 = 69000, but because this is a 16-bit int, we can't fit that!
+    // It will overflow to 69000-65536 = 3464.
+    // The signal will turn HIGH at TCNT1 = 3464.
+
     if (nextSignalLevel == LOGIC_HIGH) {
-        OCR1B += high_time;
+        OCR1B += high_time_ticks;
         nextSignalLevel = LOGIC_LOW;
     } else {
-        OCR1B += low_time;
+        OCR1B += low_time_ticks;
         nextSignalLevel = LOGIC_HIGH;
     }
 }
@@ -103,7 +124,9 @@ int main(void) {
 #define F_CPU               16000000UL
 #define UART_BAUD_RATE      9600
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
+#define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
 
+char terminalNewLine[] = "\r\n";
 volatile int print_flag = 0;
 volatile int rising_edge_count = 0;
 volatile int signal_frequency = 0;
