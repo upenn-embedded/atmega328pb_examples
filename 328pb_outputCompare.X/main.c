@@ -1,6 +1,6 @@
 // #define LED_TOGGLE_EXAMPLE
-#define PULSE_GENERATION_EXAMPLE
-// #define FREQUENCY_MEASURE_EXAMPLE
+//#define PULSE_GENERATION_EXAMPLE
+ #define FREQUENCY_MEASURE_EXAMPLE
 
 #ifdef LED_TOGGLE_EXAMPLE
 // Description: Use Output Compare match to generate a 1Hz square wave with 50% duty cycle
@@ -116,17 +116,15 @@ int main(void) {
 #ifdef FREQUENCY_MEASURE_EXAMPLE
 // Description: Measure a signal using output compare as the baseline and input capture as the counter
 
+#define F_CPU               16000000UL
 #include <xc.h>
 #include "../common_libraries/uart.h"
 #include <avr/interrupt.h>
 #include <stdio.h> // For sprintf
 
-#define F_CPU               16000000UL
-#define UART_BAUD_RATE      9600
+#define UART_BAUD_RATE      74880
 #define UART_BAUD_PRESCALER (((F_CPU / (UART_BAUD_RATE * 16UL))) - 1)
-#define __PRINT_NEW_LINE__  UART_putstring(terminalNewLine);
 
-char terminalNewLine[] = "\r\n";
 volatile int print_flag = 0;
 volatile int rising_edge_count = 0;
 volatile int signal_frequency = 0;
@@ -143,11 +141,9 @@ void Initialize() {
     // Can read frequencies from ~1Hz to ~62.5kHz
     TCCR1B |= (1 << CS12);
 
-    // Set Timer 1 to Normal
-    TCCR1A &= ~(1 << WGM10);
-    TCCR1A &= ~(1 << WGM11);
-    TCCR1B &= ~(1 << WGM12);
-    TCCR1B &= ~(1 << WGM13);
+    // Leave Timer 1 in its default, Normal mode (Mode 0)
+    // The Waveform Generation Mode bits are all zero by default
+    // The timer will count up to 0xFFFF and then overflow back to 0x0000
 
     TCCR1B |= (1 << ICES1); // Looking for rising edge
     TIMSK1 |= (1 << ICIE1); // Enable Input Capture interrupt
@@ -162,14 +158,16 @@ void Initialize() {
     TCCR0B |= (1 << CS00);
     TCCR0B |= (1 << CS02);
 
-    // Timer0, Fast PWM mode
+    // Timer0, Fast PWM (Mode 7)
     TCCR0A |= (1 << WGM00);
     TCCR0A |= (1 << WGM01);
     TCCR0B |= (1 << WGM02);
 
-    OCR0A = 39; // Sets frequency, ~390Hz
-    OCR0B = OCR0A * 1 / 4; // Sets duty cycle, 75%
-    TCCR0A |= (1 << COM0B1); // Non-inverting mode, Clear on Compare Match
+    OCR0A = 32; // Sets frequency, ~Hz
+    OCR0B = OCR0A * 3 / 4; // Sets duty cycle, 75%
+    // Set up Output Compare
+    // Non-inverting mode, Clear on Compare Match
+    TCCR0A |= (1 << COM0B1); 
 
     sei(); // Enable global interrupts
 }
@@ -180,8 +178,8 @@ ISR(TIMER1_CAPT_vect) {
 
 ISR(TIMER1_COMPA_vect) {
     signal_frequency = rising_edge_count;
-    rising_edge_count = 0;
     print_flag = 1; // Let's print the frequency in the main loop
+    rising_edge_count = 0;
 }
 
 int main(void) {
@@ -191,12 +189,12 @@ int main(void) {
     __PRINT_NEW_LINE__
     UART_putstring("ATmega328PB - Output Compare Frequency Measurement");
 
+    char intStringBuffer[10]; // Buffer to hold the converted number
     while (1) {
         if (print_flag) {
             print_flag = 0; // Reset the flag
-            char intStringBuffer[20]; // Buffer to hold the converted number
-            sprintf(intStringBuffer, "Signal Frequency:\t %d Hz", signal_frequency); // Convert integer to string
-            __PRINT_NEW_LINE__ // Make space between prints
+            sprintf(intStringBuffer, "\r\n%d Hz", signal_frequency); // Convert integer to string
+            // __PRINT_NEW_LINE__ // Make space between prints
             UART_putstring(intStringBuffer);
         }
     }
